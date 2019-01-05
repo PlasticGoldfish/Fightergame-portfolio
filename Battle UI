@@ -1,0 +1,359 @@
+package org.shadowcat.gameengine;
+
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+
+import java.awt.BorderLayout;
+
+import javax.swing.JComboBox;
+
+import java.awt.TextArea;
+import java.awt.event.ActionEvent;
+
+import javax.swing.JPanel;
+import javax.swing.JButton;
+
+import java.awt.event.ActionListener;
+import java.util.Random;
+public class Test3 {
+
+	private JFrame frame;
+	private JButton btnAttack,btnFlee,btnItem,btnNewFight,btnReHP;
+	Battle testFight;
+	private JComboBox<Actor> comboBox_2, comboBox_3;
+	private JComboBox<Item> comboBox_1;
+	private JComboBox<Attack> comboBox;
+	private TextArea textArea;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Test3 window = new Test3();
+					window.frame.setVisible(true);
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the application.
+	 */
+	public Test3() {
+		defineGUI();
+		initControls();
+		defBtnNewFightListener();	//*****	sets up listener on btnNewFight
+		defBtnAttackListener();	
+		defBtnItemListener();
+		defBtnReHPListener();
+	}
+
+	/**
+	 * Initialise the contents of the frame.
+	 */
+	private void defineGUI() {
+		
+		frame = new JFrame();
+		frame.setBounds(100, 100, 750, 300);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(new BorderLayout(0, 0));
+		
+		JPanel panel = new JPanel();
+		frame.getContentPane().add(panel, BorderLayout.SOUTH);
+		
+		comboBox = new JComboBox<Attack>();
+		comboBox_1 = new JComboBox<Item>();
+		comboBox_2 = new JComboBox<Actor>();
+		comboBox_3 = new JComboBox<Actor>();
+		panel.add(comboBox);
+	
+		btnAttack = new JButton("Attack");
+		panel.add(btnAttack);
+		
+		btnFlee = new JButton("Flee");
+		panel.add(btnFlee);
+		
+
+		panel.add(comboBox_1);
+		
+		btnItem = new JButton("Item");
+		panel.add(btnItem);
+		
+		JPanel panel_1 = new JPanel();
+		frame.getContentPane().add(panel_1, BorderLayout.NORTH);
+	
+	
+		panel_1.add(comboBox_2);
+		
+		btnNewFight = new JButton("New Fight");
+		panel_1.add(btnNewFight);
+		
+
+		panel_1.add(comboBox_3);
+		btnReHP = new JButton("Reset HP");
+		panel_1.add(btnReHP);
+		
+		textArea = new TextArea();
+		frame.getContentPane().add(textArea, BorderLayout.CENTER);
+		
+	}	//*****	end defineGUI
+	
+	private void initControls() {
+		//*****	define contents of comboboxes etc 
+		AssetLists genassets = new AssetLists("Generated Assets");
+		genassets.generateAssets();
+		
+		for (int i = 0; i < genassets.actors.size(); i++) {
+			comboBox_2.addItem(genassets.actors.get(i));
+		}
+		for (int i = 0; i < genassets.actors.size(); i++) {
+			comboBox_3.addItem(genassets.actors.get(i));
+		}
+		//*****		to start with this will be set to the actions of the first Actor selected by combobox2 
+		//*****		which will be the first in the collection actors
+		
+		testFight = new Battle("testFight");
+		Actor firstActor1 = genassets.actors.get(0);
+		testFight.setFighter1(firstActor1);
+		Actor firstActor2 = genassets.actors.get(0);
+		testFight.setFighter2(firstActor2);
+
+		
+	}	//*****	end of initControls
+		
+	private void defBtnNewFightListener() {
+		btnNewFight.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				testFight.setFighter1((Actor)comboBox_2.getSelectedItem());
+				testFight.setFighter2((Actor)comboBox_3.getSelectedItem());
+				System.out.println("Fight between player " + testFight.getFighter1().toString() + " and " +
+					testFight.getFighter2().toString());
+					testFight.setFighter1(comboBox_2.getItemAt(comboBox_2.getSelectedIndex()));
+					testFight.setFighter2(comboBox_3.getItemAt(comboBox_3.getSelectedIndex()));
+					testFight.setFighter2HP(testFight.getFighter2().getCurrentHP());
+					testFight.setFighter1HP(testFight.getFighter1().getCurrentHP());
+					comboBox.removeAllItems();
+					comboBox_1.removeAllItems();
+					testFight.setFightInProgress(true);
+					testFight.setPlayerIsVictorious(false);
+					testFight.setPlayerLost(false);
+					for (int i = 0; i < testFight.getFighter1().getAttacks().size(); i++) {
+						comboBox.addItem(testFight.getFighter1().getAttacks().get(i));
+					}
+					for (int i = 0; i < testFight.getFighter1().getInventory().size(); i++) {
+						comboBox_1.addItem(testFight.getFighter1().getInventory().get(i));
+						
+					}
+					System.out.println("Player " + testFight.Fighter1.getName() + "(Lv " + testFight.Fighter1.getLevel() + "): " + "HP " + testFight.getFighter1HP() + "/" +testFight.Fighter1.getMaxHP());
+					System.out.println(testFight.Fighter2.getName() + "(Lv " + testFight.Fighter2.getLevel() + "): " + "HP " + testFight.getFighter2HP() + "/" +testFight.Fighter2.getMaxHP());
+					System.out.println("---");
+					textArea.setText("New Fight!\n");
+					textArea.append("Player " + testFight.Fighter1.getName() + "(Lv " + testFight.Fighter1.getLevel() + "): " + "HP " + testFight.getFighter1HP() + "/" +testFight.Fighter1.getMaxHP() + " \n");
+					textArea.append("Enemy " + testFight.Fighter2.getName() + "(Lv " + testFight.Fighter2.getLevel() + "): " + "HP " + testFight.getFighter2HP() + "/" +testFight.Fighter2.getMaxHP()+ " \n");
+					textArea.append("--- \n");
+			}
+		});
+	}
+
+	private void defBtnAttackListener() {
+		btnAttack.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					
+						if (testFight.fightInProgress == true) {
+							textArea.append("Player " + testFight.Fighter1.getName() + " used " + comboBox.getItemAt(comboBox.getSelectedIndex()) + "\n");
+								if (testFight.accuracyCheck(comboBox.getItemAt(comboBox.getSelectedIndex())) == true) {
+									testFight.removeP2HP(testFight.player1Attackdamage(comboBox.getItemAt(comboBox.getSelectedIndex())));
+									if (comboBox.getItemAt(comboBox.getSelectedIndex()).isWeaponAttack == true){
+										testFight.removeP2HP(testFight.player1WeaponBonus(testFight.getFighter1().getItmLHWeapon()));
+										
+									}
+					textArea.append("Hit!"+ "\n");
+					if (testFight.getFighter2HP() <= 0) {
+					testFight.setFighter2HP(0);
+					testFight.setFightInProgress(false);
+					testFight.setPlayerIsVictorious(true);
+				
+				}	
+					textArea.append("Enemy " + testFight.getFighter2().getName() + " damaged for " + testFight.player1Attackdamage(comboBox.getItemAt(comboBox.getSelectedIndex()))+ "\n");
+					if (comboBox.getItemAt(comboBox.getSelectedIndex()).isWeaponAttack == true){
+						textArea.append("Weapon bonus! " + testFight.getFighter1().getItmLHWeapon().getItemName() + " deals additional " + testFight.player1WeaponBonus(testFight.getFighter1().getItmLHWeapon()) + " damage!\n");
+					}
+										} 
+								else {
+						System.out.println("Miss!");
+						textArea.append("Miss!"+ "\n");
+					}
+				textArea.append(testFight.Fighter2.getName() + "(Lv " + testFight.Fighter2.getLevel() + "): " + "HP " + testFight.getFighter2HP() + "/" +testFight.Fighter2.getMaxHP()+ "\n");
+				if (testFight.getFighter2HP() > 0) {
+					Attack p2random = testFight.getFighter2().getAttacks().get(new Random().nextInt(testFight.getFighter2().getAttacks().size()));
+					if (testFight.accuracyCheck(p2random) == true) {
+							testFight.removeP1HP(testFight.player2Attackdamage(p2random));
+							if (p2random.isWeaponAttack == true){
+								testFight.removeP1HP(testFight.player2WeaponBonus(testFight.getFighter2().getItmLHWeapon()));
+							}
+					textArea.append("Enemy " + testFight.Fighter2.getName() + " used " + p2random.getName() + "\n");
+					textArea.append("Player " + testFight.Fighter1.getName() + " is damaged for " + testFight.player2Attackdamage(p2random)+ "\n");
+					if (p2random.isWeaponAttack == true){
+						textArea.append("Weapon bonus! " + testFight.getFighter2().getItmLHWeapon().getItemName() + " deals additional " + testFight.player2WeaponBonus(testFight.getFighter2().getItmLHWeapon()) + " damage!\n");
+					}
+					}
+					else {
+						textArea.append("Enemy " + testFight.Fighter2.getName() + " used " + p2random.getName()+ "\n");
+						textArea.append("Miss!\n");
+					}
+				} 
+				else{
+					textArea.append(testFight.getFighter2().getName() + " is defeated!\n");
+					}
+				if (testFight.getFighter1HP() <= 0) {
+					testFight.setFighter1HP(0);
+					testFight.setFightInProgress(false);
+					testFight.setPlayerLost(true);
+									}
+					textArea.append("Player " + testFight.Fighter1.getName() + "(Lv " + testFight.Fighter1.getLevel() + "): " + "HP " + testFight.getFighter1HP() + "/" +testFight.Fighter1.getMaxHP()+ "\n");
+				if (testFight.isPlayerLost() == true) {
+					textArea.append("Player " + testFight.getFighter1().getName() + " is defeated!\n");
+					textArea.append("Enemy " + testFight.getFighter2().getName() + " is victorious!\n");
+					
+				}
+					if (testFight.isFightInProgress() == false) {
+					textArea.append("Fight is Over!\n");
+					if (testFight.isPlayerIsVictorious() == true) {
+						textArea.append("Player " + testFight.getFighter1().getName() + " is victorious!\n");
+						}
+				
+					}
+							textArea.append("---\n");
+							}
+			}
+			});
+	}
+	
+	private void defBtnItemListener() {
+		btnItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (comboBox_1.getItemCount() >0 && testFight.fightInProgress == true ) {
+				
+					if (comboBox_1.getItemAt(comboBox_1.getSelectedIndex()).isPotion == true) {
+						textArea.append("Player " + testFight.getFighter1().getName() + " used " + comboBox_1.getItemAt(comboBox_1.getSelectedIndex()).getItemName() + "!\n");	
+				testFight.addP1HP(testFight.player1GetHealValue(comboBox_1.getItemAt(comboBox_1.getSelectedIndex())));
+
+				if (testFight.getFighter1HP() > testFight.getFighter1().getMaxHP()) {
+					testFight.setFighter1HP(testFight.getFighter1().getMaxHP());
+				}
+				textArea.append("Healed by " + testFight.player1GetHealValue(comboBox_1.getItemAt(comboBox_1.getSelectedIndex())) + "!\n");
+				textArea.append("Player " + testFight.Fighter1.getName() + "(Lv " + testFight.Fighter1.getLevel() + "): " + "HP " + testFight.getFighter1HP() + "/" +testFight.Fighter1.getMaxHP()+"\n");
+				if (testFight.getFighter2HP() <= 0) {
+				testFight.setFighter2HP(0);
+				testFight.setFightInProgress(false);
+				testFight.setPlayerIsVictorious(true);
+				}
+
+				if (testFight.getFighter2HP() > 0) {
+					Attack p2random = testFight.getFighter2().getAttacks().get(new Random().nextInt(testFight.getFighter2().getAttacks().size()));
+					if (testFight.accuracyCheck(p2random) == true) {
+							testFight.removeP1HP(testFight.player2Attackdamage(p2random));
+					textArea.append("Enemy " + testFight.Fighter2.getName() + " used " + p2random.getName() + "\n");
+					if (p2random.isWeaponAttack == true){
+						testFight.removeP1HP(testFight.player2WeaponBonus(testFight.getFighter2().getItmLHWeapon()));
+				}
+				if (testFight.getFighter1HP() <= 0) {
+					testFight.setFighter1HP(0);
+					testFight.setFightInProgress(false);
+					testFight.setPlayerLost(true);
+									}
+				textArea.append("Player " + testFight.Fighter1.getName() + " is damaged for " + testFight.player2Attackdamage(p2random)+ "\n");
+				if (p2random.isWeaponAttack == true){
+					textArea.append("Weapon bonus! " + testFight.getFighter2().getItmLHWeapon().getItemName() + " deals additional " + testFight.player2WeaponBonus(testFight.getFighter2().getItmLHWeapon()) + " damage!\n");
+									}
+				textArea.append("Player " + testFight.Fighter1.getName() + "(Lv " + testFight.Fighter1.getLevel() + "): " + "HP " + testFight.getFighter1HP() + "/" +testFight.Fighter1.getMaxHP()+ "\n");
+									if (testFight.playerLost == true){
+					textArea.append("Fight is over!\nPlayer " + testFight.getFighter1().getName() + " is defeated!\n");
+					}
+					}
+					else {
+						textArea.append("Enemy " + testFight.Fighter2.getName() + " used " + p2random.getName()+ "\n");
+						textArea.append("Miss!\n");
+					}
+				} 
+				else
+					{
+					textArea.append("Enemy " + testFight.getFighter2().getName() + " is defeated!\n");
+					}				
+											}
+				if (comboBox_1.getItemAt(comboBox_1.getSelectedIndex()).isProjectile == true) 
+				{
+					textArea.append("Player " + testFight.getFighter1().getName() + " used " + comboBox_1.getItemAt(comboBox_1.getSelectedIndex()).getItemName() + "!\n");					
+				testFight.removeP2HP(testFight.player2ThrownItemDmgRec(comboBox_1.getItemAt(comboBox_1.getSelectedIndex())));
+				textArea.append("Enemy " + testFight.getFighter2().getName() + " damaged for " + testFight.player2ThrownItemDmgRec(comboBox_1.getItemAt(comboBox_1.getSelectedIndex())) + "\n");
+				if (testFight.getFighter2HP() <= 0) {
+				testFight.setFighter2HP(0);
+				testFight.setFightInProgress(false);
+				testFight.setPlayerIsVictorious(true);
+				textArea.append(testFight.Fighter2.getName() + "(Lv " + testFight.Fighter2.getLevel() + "): " + "HP " + testFight.getFighter2HP() + "/" +testFight.Fighter2.getMaxHP()+ "\n");
+				}
+				if (testFight.getFighter2HP() > 0) {
+					Attack p2random = testFight.getFighter2().getAttacks().get(new Random().nextInt(testFight.getFighter2().getAttacks().size()));
+					if (testFight.accuracyCheck(p2random) == true) {
+							testFight.removeP1HP(testFight.player2Attackdamage(p2random));
+					textArea.append("Enemy " + testFight.Fighter2.getName() + " used " + p2random.getName() + "\n");
+					if (p2random.isWeaponAttack == true){
+							testFight.removeP1HP(testFight.player1WeaponBonus(testFight.getFighter2().getItmLHWeapon()));
+					}
+					if (testFight.getFighter1HP() <= 0) {
+						testFight.setFighter1HP(0);
+						testFight.setFightInProgress(false);
+						testFight.setPlayerLost(true);
+										}
+					textArea.append("Player " + testFight.Fighter1.getName() + " is damaged for " + testFight.player2Attackdamage(p2random)+ "\n");
+					if (p2random.isWeaponAttack == true){
+						textArea.append("Weapon bonus! " + testFight.getFighter2().getItmLHWeapon().getItemName() + " deals additional " + testFight.player2WeaponBonus(testFight.getFighter2().getItmLHWeapon()) + " damage!\n");
+										}
+					textArea.append("Player " + testFight.Fighter1.getName() + "(Lv " + testFight.Fighter1.getLevel() + "): " + "HP " + testFight.getFighter1HP() + "/" +testFight.Fighter1.getMaxHP()+ "\n");
+										if (testFight.playerLost == true){
+						textArea.append("Fight is over!\nPlayer " + testFight.getFighter1().getName() + " is defeated!\n");
+					}
+					}
+					else {
+						textArea.append("Enemy " + testFight.Fighter2.getName() + " used " + p2random.getName()+ "\n");
+						System.out.println("Miss!");
+						textArea.append("Miss!\n");
+					}
+				} 
+				else
+					{
+					textArea.append("Enemy " + testFight.getFighter2().getName() + " is defeated!\n");
+					}
+				}
+		}
+				if (comboBox_1.getItemAt(comboBox_1.getSelectedIndex()).isPotion == true || comboBox_1.getItemAt(comboBox_1.getSelectedIndex()).isProjectile ==true)  {
+				comboBox_1.removeItemAt(comboBox_1.getSelectedIndex());
+				textArea.append("---\n");
+				}
+			
+		}
+		});
+	}
+	
+	private void defBtnReHPListener() {
+		btnReHP.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				testFight.setFighter1HP(testFight.getFighter1().getMaxHP());
+				testFight.setFighter2HP(testFight.getFighter2().getMaxHP());
+				textArea.append("Enemy " + testFight.Fighter1.getName() + "(Lv " + testFight.Fighter1.getLevel() + "): " + "HP " + testFight.getFighter1HP() + "/" +testFight.Fighter1.getMaxHP() + "\n");
+				textArea.append("Enemy " + testFight.Fighter2.getName() + "(Lv " + testFight.Fighter2.getLevel() + "): " + "HP " + testFight.getFighter2HP() + "/" +testFight.Fighter2.getMaxHP() + "\n");
+				testFight.setFightInProgress(true);
+				testFight.setPlayerIsVictorious(false);
+				testFight.setPlayerLost(false);
+			}
+		});
+	}
+	
+}	//*****		end of class
